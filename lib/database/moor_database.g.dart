@@ -14,7 +14,7 @@ class MedicinesTableData extends DataClass
   final String image;
   final String dose;
   MedicinesTableData(
-      {this.id,
+      {@required this.id,
       @required this.name,
       @required this.image,
       @required this.dose});
@@ -32,8 +32,37 @@ class MedicinesTableData extends DataClass
       dose: stringType.mapFromDatabaseResponse(data['${effectivePrefix}dose']),
     );
   }
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (!nullToAbsent || id != null) {
+      map['id'] = Variable<int>(id);
+    }
+    if (!nullToAbsent || name != null) {
+      map['name'] = Variable<String>(name);
+    }
+    if (!nullToAbsent || image != null) {
+      map['image'] = Variable<String>(image);
+    }
+    if (!nullToAbsent || dose != null) {
+      map['dose'] = Variable<String>(dose);
+    }
+    return map;
+  }
+
+  MedicinesTableCompanion toCompanion(bool nullToAbsent) {
+    return MedicinesTableCompanion(
+      id: id == null && nullToAbsent ? const Value.absent() : Value(id),
+      name: name == null && nullToAbsent ? const Value.absent() : Value(name),
+      image:
+          image == null && nullToAbsent ? const Value.absent() : Value(image),
+      dose: dose == null && nullToAbsent ? const Value.absent() : Value(dose),
+    );
+  }
+
   factory MedicinesTableData.fromJson(Map<String, dynamic> json,
-      {ValueSerializer serializer = const ValueSerializer.defaults()}) {
+      {ValueSerializer serializer}) {
+    serializer ??= moorRuntimeOptions.defaultSerializer;
     return MedicinesTableData(
       id: serializer.fromJson<int>(json['id']),
       name: serializer.fromJson<String>(json['name']),
@@ -42,25 +71,14 @@ class MedicinesTableData extends DataClass
     );
   }
   @override
-  Map<String, dynamic> toJson(
-      {ValueSerializer serializer = const ValueSerializer.defaults()}) {
-    return {
+  Map<String, dynamic> toJson({ValueSerializer serializer}) {
+    serializer ??= moorRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'name': serializer.toJson<String>(name),
       'image': serializer.toJson<String>(image),
       'dose': serializer.toJson<String>(dose),
     };
-  }
-
-  @override
-  MedicinesTableCompanion createCompanion(bool nullToAbsent) {
-    return MedicinesTableCompanion(
-      id: id == null && nullToAbsent ? const Value.absent() : Value(id),
-      name: name == null && nullToAbsent ? const Value.absent() : Value(name),
-      image:
-          image == null && nullToAbsent ? const Value.absent() : Value(image),
-      dose: dose == null && nullToAbsent ? const Value.absent() : Value(dose),
-    );
   }
 
   MedicinesTableData copyWith(
@@ -86,7 +104,7 @@ class MedicinesTableData extends DataClass
   int get hashCode => $mrjf($mrjc(
       id.hashCode, $mrjc(name.hashCode, $mrjc(image.hashCode, dose.hashCode))));
   @override
-  bool operator ==(other) =>
+  bool operator ==(dynamic other) =>
       identical(this, other) ||
       (other is MedicinesTableData &&
           other.id == this.id &&
@@ -114,6 +132,20 @@ class MedicinesTableCompanion extends UpdateCompanion<MedicinesTableData> {
   })  : name = Value(name),
         image = Value(image),
         dose = Value(dose);
+  static Insertable<MedicinesTableData> custom({
+    Expression<int> id,
+    Expression<String> name,
+    Expression<String> image,
+    Expression<String> dose,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (image != null) 'image': image,
+      if (dose != null) 'dose': dose,
+    });
+  }
+
   MedicinesTableCompanion copyWith(
       {Value<int> id,
       Value<String> name,
@@ -125,6 +157,35 @@ class MedicinesTableCompanion extends UpdateCompanion<MedicinesTableData> {
       image: image ?? this.image,
       dose: dose ?? this.dose,
     );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (image.present) {
+      map['image'] = Variable<String>(image.value);
+    }
+    if (dose.present) {
+      map['dose'] = Variable<String>(dose.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MedicinesTableCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('image: $image, ')
+          ..write('dose: $dose')
+          ..write(')'))
+        .toString();
   }
 }
 
@@ -184,30 +245,29 @@ class $MedicinesTableTable extends MedicinesTable
   @override
   final String actualTableName = 'medicines_table';
   @override
-  VerificationContext validateIntegrity(MedicinesTableCompanion d,
+  VerificationContext validateIntegrity(Insertable<MedicinesTableData> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
-    if (d.id.present) {
-      context.handle(_idMeta, id.isAcceptableValue(d.id.value, _idMeta));
-    } else if (id.isRequired && isInserting) {
-      context.missing(_idMeta);
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id'], _idMeta));
     }
-    if (d.name.present) {
+    if (data.containsKey('name')) {
       context.handle(
-          _nameMeta, name.isAcceptableValue(d.name.value, _nameMeta));
-    } else if (name.isRequired && isInserting) {
+          _nameMeta, name.isAcceptableOrUnknown(data['name'], _nameMeta));
+    } else if (isInserting) {
       context.missing(_nameMeta);
     }
-    if (d.image.present) {
+    if (data.containsKey('image')) {
       context.handle(
-          _imageMeta, image.isAcceptableValue(d.image.value, _imageMeta));
-    } else if (image.isRequired && isInserting) {
+          _imageMeta, image.isAcceptableOrUnknown(data['image'], _imageMeta));
+    } else if (isInserting) {
       context.missing(_imageMeta);
     }
-    if (d.dose.present) {
+    if (data.containsKey('dose')) {
       context.handle(
-          _doseMeta, dose.isAcceptableValue(d.dose.value, _doseMeta));
-    } else if (dose.isRequired && isInserting) {
+          _doseMeta, dose.isAcceptableOrUnknown(data['dose'], _doseMeta));
+    } else if (isInserting) {
       context.missing(_doseMeta);
     }
     return context;
@@ -222,24 +282,6 @@ class $MedicinesTableTable extends MedicinesTable
   }
 
   @override
-  Map<String, Variable> entityToSql(MedicinesTableCompanion d) {
-    final map = <String, Variable>{};
-    if (d.id.present) {
-      map['id'] = Variable<int, IntType>(d.id.value);
-    }
-    if (d.name.present) {
-      map['name'] = Variable<String, StringType>(d.name.value);
-    }
-    if (d.image.present) {
-      map['image'] = Variable<String, StringType>(d.image.value);
-    }
-    if (d.dose.present) {
-      map['dose'] = Variable<String, StringType>(d.dose.value);
-    }
-    return map;
-  }
-
-  @override
   $MedicinesTableTable createAlias(String alias) {
     return $MedicinesTableTable(_db, alias);
   }
@@ -251,5 +293,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   $MedicinesTableTable get medicinesTable =>
       _medicinesTable ??= $MedicinesTableTable(this);
   @override
-  List<TableInfo> get allTables => [medicinesTable];
+  Iterable<TableInfo> get allTables => allSchemaEntities.whereType<TableInfo>();
+  @override
+  List<DatabaseSchemaEntity> get allSchemaEntities => [medicinesTable];
 }

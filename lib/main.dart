@@ -124,7 +124,7 @@ class _MyMedicineReminder extends State<MyMedicineRemainder> {
           msg: "The Medicine was added!",
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.BOTTOM,
-          timeInSecForIos: 1,
+          // timeInSecForIos: 1,
           backgroundColor: Theme.of(context).accentColor,
           textColor: Colors.white,
           fontSize: 20.0);
